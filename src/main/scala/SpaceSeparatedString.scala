@@ -6,16 +6,13 @@ trait SpaceSeparatedString[A] {
 }
 
 object SpaceSeparatedString {
-  // TODO: replace
-  inline def showTuple[E <: Tuple, L <: Tuple](elements: E): List[String] =
-    inline (elements, erasedValue[L]) match {
-      case (EmptyTuple, EmptyTuple)          => List()
-      case (el: (eh *: et), lab: (lh *: lt)) =>
-        val (h *: t) = el
-        val label    = constValue[lh]
-        val value    = summonInline[SpaceSeparatedString[eh]].serialize(h)
-
-        (value) :: showTuple[et, lt](t)
+  inline def serializeTuple[E <: Tuple](elements: E): List[String] =
+    inline elements match {
+      case EmptyTuple     => List()
+      case el: (eh *: et) =>
+        val h *: t = el
+        val value  = summonInline[SpaceSeparatedString[eh]].serialize(h)
+        value :: serializeTuple[et](t)
     }
 
   given SpaceSeparatedString[String] with
@@ -28,7 +25,7 @@ object SpaceSeparatedString {
       override def serialize(a: A): String = {
         val valueTuple = Tuple.fromProductTyped(a)
         val fieldReprs =
-          showTuple[m.MirroredElemTypes, m.MirroredElemLabels](valueTuple)
+          serializeTuple[m.MirroredElemTypes](valueTuple)
         fieldReprs.mkString
       }
     }
