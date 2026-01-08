@@ -1,4 +1,5 @@
 import scala.compiletime.constValue
+import scala.deriving.Mirror
 import scala.quoted.{Expr, Quotes}
 
 case class MaxLengthString[N <: Int] private(s: String)
@@ -24,5 +25,21 @@ object MaxLengthString {
     if(sLength<=maxLength) '{MaxLengthString.unsafe[N](${s})}
     else report.errorAndAbort(s"Invalid string ${s.valueOrAbort} with length $sLength for maxLength $maxLength")
   }
-  
+
+  given [N <: Int & Singleton](using ValueOf[N])
+  : SpaceSeparatedString[MaxLengthString[N]] = derived[N]
+
+  inline def derived[N<:Int](using m: Mirror.ProductOf[MaxLengthString[N]]): SpaceSeparatedString[MaxLengthString[N]] = {
+    new SpaceSeparatedString[MaxLengthString[N]] {
+      override def serialize(a: MaxLengthString[N]): String = {
+        val n = valueOf[N]
+        val truncated = a.s.take(n)
+        val spaces = " "*(n-truncated.length)
+        truncated + spaces
+      }
+    }
+  }
+
+
+
 }
