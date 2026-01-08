@@ -1,5 +1,3 @@
-import Person.{MaxLen1, MaxLen2}
-
 object Main {
   def main(args: Array[String]): Unit = {
     println(MaxLengthString[5]("hello there"))

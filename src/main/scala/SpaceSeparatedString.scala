@@ -8,28 +8,16 @@ trait SpaceSeparatedString[A] {
 object SpaceSeparatedString {
  //TODO: replace
   inline def showTuple[E <: Tuple, L <: Tuple](elements: E): List[String] =
-    inline (elements, erasedValue[L]) match { // (("Daniel", 99, true), ("name", "age", "programmer"))
+    inline (elements, erasedValue[L]) match { 
       case (EmptyTuple, EmptyTuple) => List()
       case (el: (eh *: et), lab: (lh *: lt)) =>
-        val (h *: t) = el // h = "Daniel", t = (99, true)
-        val label = constValue[lh] // label = "name"
-        val value = summonInline[SpaceSeparatedString[eh]].serialize(h) // Show[String].show("Daniel")
+        val (h *: t) = el 
+        val label = constValue[lh]
+        val value = summonInline[SpaceSeparatedString[eh]].serialize(h) 
 
         (value) :: showTuple[et, lt](t)
-      // "name: Daniel" :: showTuple[(Int, Boolean), ("age", "programmer")]((99, true))
     }
-//
-//  inline def derived[N <: Int : ValueOf](using m: Mirror.ProductOf[MaxLengthString[N]]): SpaceSeparatedString[MaxLengthString[N]] = {
-//    new SpaceSeparatedString[MaxLengthString[N]] {
-//      override def serialize(a: MaxLengthString[N]): String = {
-//        val valueTuple = Tuple.fromProductTyped(a)
-//        val n = valueOf[N]
-//        val truncated = a.s.take(n)
-//        val spaces = " " * (n - truncated.length)
-//        truncated + spaces
-//      }
-//    }
-//  }
+
 
   given SpaceSeparatedString[String] with
     override def serialize(a: String): String = a
